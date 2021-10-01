@@ -1,14 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 
+import {
+  Container,
+  Conteudo,
+  Header,
+  Form,
+  Campo,
+  Label,
+  Input,
+  Select,
+  BtnAcessar,
+  BtnEnviar,
+  HeaderChat,
+  ImgUsuario,
+} from './styles/styles';
+
 let socket;
 
 function App() {
   const ENDPOINT = 'http://localhost:8080/';
 
-  const [logado, setLogado] = useState(false);
-  const [nome, setNome] = useState('');
-  const [sala, setSala] = useState('');
+  // const [logado, setLogado] = useState(false);
+  // const [nome, setNome] = useState('');
+  // const [sala, setSala] = useState('');
+
+  const [logado, setLogado] = useState(true);
+  const [nome, setNome] = useState('Renan');
+  const [sala, setSala] = useState('1');
 
   const [mensagem, setMensagem] = useState('');
   const [listaMensagem, setListaMensagem] = useState([]);
@@ -43,24 +62,26 @@ function App() {
     setMensagem('');
   };
   return (
-    <div>
-      <h1>Chat</h1>
+    <Container>
       {!logado ? (
-        <>
-          <label>Nome </label>
-          <input
-            type='text'
-            placeholder='Nome'
-            name='nome'
-            value={nome}
-            onChange={(texto) => {
-              setNome(texto.target.value);
-            }}
-          />
-          <br />
-          <br />
-          <label>Sala </label>
-          {/* <input
+        <Conteudo>
+          <Header>My chat about coding...</Header>
+          <Form>
+            <Campo>
+              <Label>Nome </Label>
+              <Input
+                type='text'
+                placeholder='Nome'
+                name='nome'
+                value={nome}
+                onChange={(texto) => {
+                  setNome(texto.target.value);
+                }}
+              />
+            </Campo>
+            <Campo>
+              <Label>Sala </Label>
+              {/* <input
             type='text'
             placeholder='Sala'
             name='sala'
@@ -70,22 +91,25 @@ function App() {
             }}
           /> */}
 
-          <select
-            name='sala'
-            value={sala}
-            onChange={(texto) => setSala(texto.target.value)}>
-            <option value=''>Selecione</option>
-            <option value='1'>Node</option>
-            <option value='2'>React</option>
-            <option value='3'>React Native</option>
-            <option value='4'>PHP</option>
-          </select>
-          <br />
-          <br />
-          <button onClick={conectarSala}>Acessar</button>
-        </>
+              <Select
+                name='sala'
+                value={sala}
+                onChange={(texto) => setSala(texto.target.value)}>
+                <option value=''>Selecione</option>
+                <option value='1'>Node</option>
+                <option value='2'>React</option>
+                <option value='3'>React Native</option>
+                <option value='4'>PHP</option>
+              </Select>
+            </Campo>
+            <BtnAcessar onClick={conectarSala}>Acessar</BtnAcessar>
+          </Form>
+        </Conteudo>
       ) : (
-        <>
+        <Conteudo>
+          <HeaderChat>
+            <ImgUsuario src='renan.jpg' alt={nome} />
+          </HeaderChat>
           {listaMensagem.map((msg, key) => {
             return (
               <div key={key}>
@@ -93,7 +117,7 @@ function App() {
               </div>
             );
           })}
-          <input
+          <Input
             type='text'
             name='mensagem'
             placeholder='Mensagem...'
@@ -102,10 +126,10 @@ function App() {
               setMensagem(texto.target.value);
             }}
           />
-          <button onClick={enviarMensagem}>Enviar</button>
-        </>
+          <BtnEnviar onClick={enviarMensagem}>Enviar</BtnEnviar>
+        </Conteudo>
       )}
-    </div>
+    </Container>
   );
 }
 
