@@ -14,6 +14,18 @@ import {
   BtnEnviar,
   HeaderChat,
   ImgUsuario,
+  NomeUsuario,
+  ChatBox,
+  ConteudoChat,
+  MsgEnviada,
+  DetMsgEnviada,
+  TextoMsgEnviada,
+  MsgRecebida,
+  DetMsgRecebida,
+  TextoMsg,
+  EnviarMsg,
+  CampoMsg,
+  BtnEnviarMsg,
 } from './styles/styles';
 
 let socket;
@@ -21,13 +33,13 @@ let socket;
 function App() {
   const ENDPOINT = 'http://localhost:8080/';
 
-  // const [logado, setLogado] = useState(false);
-  // const [nome, setNome] = useState('');
-  // const [sala, setSala] = useState('');
+  const [logado, setLogado] = useState(false);
+  const [nome, setNome] = useState('');
+  const [sala, setSala] = useState('');
 
-  const [logado, setLogado] = useState(true);
-  const [nome, setNome] = useState('Renan');
-  const [sala, setSala] = useState('1');
+  // const [logado, setLogado] = useState(true);
+  // const [nome, setNome] = useState('Renan');
+  // const [sala, setSala] = useState('1');
 
   const [mensagem, setMensagem] = useState('');
   const [listaMensagem, setListaMensagem] = useState([]);
@@ -106,28 +118,49 @@ function App() {
           </Form>
         </Conteudo>
       ) : (
-        <Conteudo>
+        <ConteudoChat>
           <HeaderChat>
             <ImgUsuario src='renan.jpg' alt={nome} />
+            <NomeUsuario>{nome}</NomeUsuario>
           </HeaderChat>
-          {listaMensagem.map((msg, key) => {
-            return (
-              <div key={key}>
-                {msg.nome}: {msg.mensagem}
-              </div>
-            );
-          })}
-          <Input
-            type='text'
-            name='mensagem'
-            placeholder='Mensagem...'
-            value={mensagem}
-            onChange={(texto) => {
-              setMensagem(texto.target.value);
-            }}
-          />
-          <BtnEnviar onClick={enviarMensagem}>Enviar</BtnEnviar>
-        </Conteudo>
+          <ChatBox>
+            {listaMensagem.map((msg, key) => {
+              return (
+                <>
+                  {nome === msg.nome ? (
+                    <MsgEnviada key={key}>
+                      <DetMsgEnviada>
+                        <TextoMsgEnviada>
+                          {msg.nome} diz: {msg.mensagem}
+                        </TextoMsgEnviada>
+                      </DetMsgEnviada>
+                    </MsgEnviada>
+                  ) : (
+                    <MsgRecebida key={key}>
+                      <DetMsgRecebida>
+                        <TextoMsg>
+                          {msg.nome} diz: {msg.mensagem}
+                        </TextoMsg>
+                      </DetMsgRecebida>
+                    </MsgRecebida>
+                  )}
+                </>
+              );
+            })}
+          </ChatBox>
+          <EnviarMsg>
+            <CampoMsg
+              type='text'
+              name='mensagem'
+              placeholder='Mensagem...'
+              value={mensagem}
+              onChange={(texto) => {
+                setMensagem(texto.target.value);
+              }}
+            />
+            <BtnEnviarMsg onClick={enviarMensagem}>Enviar</BtnEnviarMsg>
+          </EnviarMsg>
+        </ConteudoChat>
       )}
     </Container>
   );
