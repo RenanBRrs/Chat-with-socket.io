@@ -77,9 +77,9 @@ export const HeaderChat = styled.header`
 `;
 
 export const ImgUsuario = styled.img`
-  height: 45px;
-  width: 45px;
-  margin: 0 15px;
+  height: 70px;
+  width: 80px;
+  margin: 100 1px;
 `;
 
 export const NomeUsuario = styled.div`

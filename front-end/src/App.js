@@ -11,7 +11,6 @@ import {
   Input,
   Select,
   BtnAcessar,
-  BtnEnviar,
   HeaderChat,
   ImgUsuario,
   NomeUsuario,
@@ -35,6 +34,7 @@ function App() {
 
   const [logado, setLogado] = useState(false);
   const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
   const [sala, setSala] = useState('');
 
   // const [logado, setLogado] = useState(true);
@@ -52,10 +52,12 @@ function App() {
       setListaMensagem([...listaMensagem, dados]);
     });
   });
-  const conectarSala = () => {
-    console.log('Voce acessou a sala ' + sala + ' com o usuario ' + nome);
-    setLogado(true);
-    socket.emit('sala_conectar', sala);
+  const conectarSala = async e => {
+    e.preventDefault();
+
+    console.log('Voce acessou a sala ' + sala + ' com o usuario ' + email);
+    // setLogado(true);
+    // socket.emit('sala_conectar', sala);
   };
 
   const enviarMensagem = async () => {
@@ -63,7 +65,7 @@ function App() {
     const conteudoMensagem = {
       sala,
       conteudo: {
-        nome,
+        email,
         mensagem,
       },
     };
@@ -78,16 +80,16 @@ function App() {
       {!logado ? (
         <Conteudo>
           <Header>My chat about coding...</Header>
-          <Form>
+          <Form onSubmit={conectarSala}>
             <Campo>
-              <Label>Nome </Label>
+              <Label>E-mail </Label>
               <Input
                 type='text'
-                placeholder='Nome'
-                name='nome'
-                value={nome}
+                placeholder='E-mail'
+                name='email'
+                value={email}
                 onChange={(texto) => {
-                  setNome(texto.target.value);
+                  setEmail(texto.target.value);
                 }}
               />
             </Campo>
@@ -114,24 +116,24 @@ function App() {
                 <option value='4'>PHP</option>
               </Select>
             </Campo>
-            <BtnAcessar onClick={conectarSala}>Acessar</BtnAcessar>
+            <BtnAcessar>Acessar</BtnAcessar>
           </Form>
         </Conteudo>
       ) : (
         <ConteudoChat>
           <HeaderChat>
-            <ImgUsuario src='renan.jpg' alt={nome} />
+            <ImgUsuario src='kratos.png' alt={email} />
             <NomeUsuario>{nome}</NomeUsuario>
           </HeaderChat>
           <ChatBox>
             {listaMensagem.map((msg, key) => {
               return (
                 <>
-                  {nome === msg.nome ? (
+                  {email === msg.email ? (
                     <MsgEnviada key={key}>
                       <DetMsgEnviada>
                         <TextoMsgEnviada>
-                          {msg.nome} diz: {msg.mensagem}
+                          {msg.email} diz: {msg.mensagem}
                         </TextoMsgEnviada>
                       </DetMsgEnviada>
                     </MsgEnviada>
@@ -139,7 +141,7 @@ function App() {
                     <MsgRecebida key={key}>
                       <DetMsgRecebida>
                         <TextoMsg>
-                          {msg.nome} diz: {msg.mensagem}
+                          {msg.email} diz: {msg.mensagem}
                         </TextoMsg>
                       </DetMsgRecebida>
                     </MsgRecebida>
