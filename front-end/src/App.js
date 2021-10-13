@@ -26,6 +26,7 @@ import {
   CampoMsg,
   BtnEnviarMsg,
 } from './styles/styles';
+import api from './config/configAPI';
 
 let socket;
 
@@ -33,6 +34,7 @@ function App() {
   const ENDPOINT = 'http://localhost:8080/';
 
   const [logado, setLogado] = useState(false);
+  const [usuarioId, setUsuarioId] = useState('');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [sala, setSala] = useState('');
@@ -52,21 +54,65 @@ function App() {
       setListaMensagem([...listaMensagem, dados]);
     });
   });
-  const conectarSala = async e => {
+  const conectarSala = async (e) => {
     e.preventDefault();
 
     console.log('Voce acessou a sala ' + sala + ' com o usuario ' + email);
-    // setLogado(true);
-    // socket.emit('sala_conectar', sala);
+
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    await api
+      .post('/validar-acesso', { email }, { headers })
+      .then((response) => {
+        console.log(response.data.usuario.id);
+        console.log(response.data.usuario.nome);
+        console.log(response.data.mensagem);
+        setNome(response.data.usuario.nome);
+        setUsuarioId(response.data.usuario.id);
+        setLogado(true);
+        socket.emit('sala_conectar', sala);
+        listarMensagens();
+      })
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data.mensagem);
+        } else {
+          console.log('Erro: Tente mais tarde. ');
+        }
+      });
   };
 
-  const enviarMensagem = async () => {
+  const listarMensagens = async () => {
+    await api
+      .get('/listar-mensagens/' + sala)
+      .then((response) => {
+        console.log(response);
+        console.log(response.data.mensagens);
+        // setListaMensagem([...listaMensagem, response.data.mensagens]);
+        setListaMensagem(response.data.mensagens);
+      })
+      .catch((err) => {
+        if (err.response) {
+          console.log(err.response.data.mensagem);
+        } else {
+          console.log('Erro: Tente mais tarde!');
+        }
+      });
+  };
+
+  const enviarMensagem = async (e) => {
+    e.preventDefault();
     console.log('Mensagem ' + mensagem);
     const conteudoMensagem = {
       sala,
       conteudo: {
-        email,
         mensagem,
+        usuario: {
+          id: usuarioId,
+          nome,
+        },
       },
     };
     console.log(conteudoMensagem);
@@ -95,15 +141,6 @@ function App() {
             </Campo>
             <Campo>
               <Label>Sala </Label>
-              {/* <input
-            type='text'
-            placeholder='Sala'
-            name='sala'
-            value={sala}
-            onChange={(text) => {
-              setSala(text.target.value);
-            }}
-          /> */}
 
               <Select
                 name='sala'
@@ -122,18 +159,18 @@ function App() {
       ) : (
         <ConteudoChat>
           <HeaderChat>
-            <ImgUsuario src='kratos.png' alt={email} />
+            <ImgUsuario src='kratos.png' alt={nome} />
             <NomeUsuario>{nome}</NomeUsuario>
           </HeaderChat>
           <ChatBox>
             {listaMensagem.map((msg, key) => {
               return (
                 <>
-                  {email === msg.email ? (
+                  {usuarioId === msg.usuario.id ? (
                     <MsgEnviada key={key}>
                       <DetMsgEnviada>
                         <TextoMsgEnviada>
-                          {msg.email} diz: {msg.mensagem}
+                          {msg.usuario.nome} diz: {msg.mensagem}
                         </TextoMsgEnviada>
                       </DetMsgEnviada>
                     </MsgEnviada>
@@ -141,7 +178,7 @@ function App() {
                     <MsgRecebida key={key}>
                       <DetMsgRecebida>
                         <TextoMsg>
-                          {msg.email} diz: {msg.mensagem}
+                          {msg.usuario.nome} diz: {msg.mensagem}
                         </TextoMsg>
                       </DetMsgRecebida>
                     </MsgRecebida>
@@ -150,7 +187,7 @@ function App() {
               );
             })}
           </ChatBox>
-          <EnviarMsg>
+          <EnviarMsg onSubmit={enviarMensagem}>
             <CampoMsg
               type='text'
               name='mensagem'
@@ -160,7 +197,7 @@ function App() {
                 setMensagem(texto.target.value);
               }}
             />
-            <BtnEnviarMsg onClick={enviarMensagem}>Enviar</BtnEnviarMsg>
+            <BtnEnviarMsg>Enviar</BtnEnviarMsg>
           </EnviarMsg>
         </ConteudoChat>
       )}

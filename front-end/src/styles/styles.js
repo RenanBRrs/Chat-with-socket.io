@@ -135,7 +135,7 @@ export const TextoMsg = styled.p`
   box-shadow: 0 0 32px rgba(0 0 0 / 8%), 0rem 16px 16px -16px rgba(0 0 0 / 10%);
 `;
 
-export const EnviarMsg = styled.div`
+export const EnviarMsg = styled.form`
   padding: 18px 15px;
   display: flex;
   justify-content: space-between;

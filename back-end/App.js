@@ -4,6 +4,8 @@ const cors = require('cors');
 const app = express();
 
 const Usuario = require('./models/Usuario');
+const Mensagem = require('./models/Mensagem');
+const Sala = require('./models/Sala');
 
 app.use(express.json());
 
@@ -18,8 +20,62 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', function (req, res) {
-  res.send('Bem vindo!');
+app.get('/listar-mensagens/:sala', async (req, res) => {
+  const { sala } = req.params;
+  await Mensagem.findAll({
+    order: [['id', 'ASC']],
+    where: { salaId: sala },
+    include: [
+      {
+        model: Usuario,
+      },
+      {
+        model: Sala,
+      },
+    ],
+  })
+    .then((mensagens) => {
+      return res.json({
+        erro: false,
+        mensagens,
+      });
+    })
+    .catch(() => {
+      return res.status(400)({
+        erro: true,
+        mensagens: 'Erro: Nenhuma mensagem cadastrada!',
+      });
+    });
+});
+app.post('/cadastrar-mensagem', async (req, res) => {
+  await Mensagem.create(req.body)
+    .then(() => {
+      return res.json({
+        erro: false,
+        mensagem: 'Mensagem cadastrado.',
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json({
+        erro: true,
+        mensagem: err + 'Mensagem não cadastrada.',
+      });
+    });
+});
+app.post('/cadastrar-sala', async (req, res) => {
+  await Sala.create(req.body)
+    .then(() => {
+      return res.json({
+        erro: false,
+        mensagem: 'Sala cadastrado.',
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json({
+        erro: true,
+        mensagem: err + 'Sala não cadastrada.',
+      });
+    });
 });
 
 app.post('/cadastrar-usuario', async (req, res) => {
@@ -88,6 +144,13 @@ io.on('connection', (socket) => {
 
   socket.on('enviar_mensagem', (dados) => {
     console.log(dados);
+
+    Mensagem.create({
+      mensagem: dados.conteudo.mensagem,
+      salaId: dados.sala,
+      usuarioId: dados.conteudo.usuario.id,
+    });
+
     socket.to(dados.sala).emit('receber_mensagem', dados.conteudo);
   });
 });
