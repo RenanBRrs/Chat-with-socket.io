@@ -7,3 +7,5 @@
 4º npm install --save styled-components
 
 5º npm install --save axios
+
+6º npm install --save react-scroll-to-bottom

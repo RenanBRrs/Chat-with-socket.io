@@ -88,10 +88,9 @@ export const NomeUsuario = styled.div`
 `;
 export const ChatBox = styled.div`
   position: relative;
-  min-height: 390px;
-  max-height: 390px;
+
   overflow-y: auto;
-  padding: 10px 10px 20px 10px;
+  padding: 10px 0px 0px 10px;
   background-color: #f7f7f7;
   box-shadow: inset 0 32px 32px -32px rgba(0 0 0 / 5%),
     inset 0 32px 32px -32px rgba(0 0 0 / 5%);
@@ -159,4 +158,20 @@ export const BtnEnviarMsg = styled.button`
   font-size: 19px;
   cursor: pointer;
   border-radius: 0 5px 5px 0;
+`;
+export const AlertErro = styled.p`
+  background-color: #f8d7da;
+  color: #842029;
+  margin: 10px 0;
+  border: 1px solid #f5c2c7;
+  border-radius: 5px;
+  padding: 7px;
+`;
+export const AlertSucesso = styled.p`
+  background-color: #d1e7dd;
+  color: #0f5132;
+  margin: 10px 0;
+  border: 1px solid #badbcc;
+  border-radius: 5px;
+  padding: 7px;
 `;

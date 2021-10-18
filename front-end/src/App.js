@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
+import ScrollToBottom from 'react-scroll-to-bottom';
 
 import {
   Container,
@@ -25,6 +26,8 @@ import {
   EnviarMsg,
   CampoMsg,
   BtnEnviarMsg,
+  AlertErro,
+  AlertSucesso,
 } from './styles/styles';
 import api from './config/configAPI';
 
@@ -38,6 +41,7 @@ function App() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [sala, setSala] = useState('');
+  const [salas, setSalas] = useState([]);
 
   // const [logado, setLogado] = useState(true);
   // const [nome, setNome] = useState('Renan');
@@ -46,14 +50,42 @@ function App() {
   const [mensagem, setMensagem] = useState('');
   const [listaMensagem, setListaMensagem] = useState([]);
 
+  const [status, setStatus] = useState({
+    type: '',
+    mensagem: '',
+  });
+
   useEffect(() => {
     socket = socketIOClient(ENDPOINT);
+    listarSalas();
   }, []);
   useEffect(() => {
     socket.on('receber_mensagem', (dados) => {
       setListaMensagem([...listaMensagem, dados]);
     });
   });
+
+  const listarSalas = async () => {
+    await api
+      .get('/listar-sala')
+      .then((response) => {
+        setSalas(response.data.salas);
+      })
+      .catch((err) => {
+        if (err.response) {
+          setStatus({
+            type: 'erro',
+            mensagem: err.response.data.mensagem,
+          });
+        } else {
+          setStatus({
+            type: 'erro',
+            mensagem: 'Erro: Tente mais tarde!!!',
+          });
+        }
+      });
+  };
+
   const conectarSala = async (e) => {
     e.preventDefault();
 
@@ -77,9 +109,15 @@ function App() {
       })
       .catch((err) => {
         if (err.response) {
-          console.log(err.response.data.mensagem);
+          setStatus({
+            type: 'erro',
+            mensagem: err.response.data.mensagem,
+          });
         } else {
-          console.log('Erro: Tente mais tarde. ');
+          setStatus({
+            type: 'erro',
+            mensagem: 'Erro: Tente mais tarde. ',
+          });
         }
       });
   };
@@ -127,6 +165,11 @@ function App() {
         <Conteudo>
           <Header>My chat about coding...</Header>
           <Form onSubmit={conectarSala}>
+            {status.type === 'erro' ? (
+              <AlertErro>{status.mensagem}</AlertErro>
+            ) : (
+              ''
+            )}
             <Campo>
               <Label>E-mail </Label>
               <Input
@@ -147,10 +190,13 @@ function App() {
                 value={sala}
                 onChange={(texto) => setSala(texto.target.value)}>
                 <option value=''>Selecione</option>
-                <option value='1'>Node</option>
-                <option value='2'>React</option>
-                <option value='3'>React Native</option>
-                <option value='4'>PHP</option>
+                {salas.map((sala) => {
+                  return (
+                    <option value={sala.id} key={sala.id}>
+                      {sala.nome}
+                    </option>
+                  );
+                })}
               </Select>
             </Campo>
             <BtnAcessar>Acessar</BtnAcessar>
@@ -163,30 +209,33 @@ function App() {
             <NomeUsuario>{nome}</NomeUsuario>
           </HeaderChat>
           <ChatBox>
-            {listaMensagem.map((msg, key) => {
-              return (
-                <>
-                  {usuarioId === msg.usuario.id ? (
-                    <MsgEnviada key={key}>
-                      <DetMsgEnviada>
-                        <TextoMsgEnviada>
-                          {msg.usuario.nome} diz: {msg.mensagem}
-                        </TextoMsgEnviada>
-                      </DetMsgEnviada>
-                    </MsgEnviada>
-                  ) : (
-                    <MsgRecebida key={key}>
-                      <DetMsgRecebida>
-                        <TextoMsg>
-                          {msg.usuario.nome} diz: {msg.mensagem}
-                        </TextoMsg>
-                      </DetMsgRecebida>
-                    </MsgRecebida>
-                  )}
-                </>
-              );
-            })}
+            <ScrollToBottom className='scrollMsg'>
+              {listaMensagem.map((msg, key) => {
+                return (
+                  <>
+                    {usuarioId === msg.usuario.id ? (
+                      <MsgEnviada key={key}>
+                        <DetMsgEnviada>
+                          <TextoMsgEnviada>
+                            {msg.usuario.nome} diz: {msg.mensagem}
+                          </TextoMsgEnviada>
+                        </DetMsgEnviada>
+                      </MsgEnviada>
+                    ) : (
+                      <MsgRecebida key={key}>
+                        <DetMsgRecebida>
+                          <TextoMsg>
+                            {msg.usuario.nome} diz: {msg.mensagem}
+                          </TextoMsg>
+                        </DetMsgRecebida>
+                      </MsgRecebida>
+                    )}
+                  </>
+                );
+              })}
+            </ScrollToBottom>
           </ChatBox>
+
           <EnviarMsg onSubmit={enviarMensagem}>
             <CampoMsg
               type='text'
